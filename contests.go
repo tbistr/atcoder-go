@@ -73,7 +73,7 @@ func (pager *ContestsPager) Next() (contests []*Contest, ok bool) {
 	}
 
 	pager.page++
-	return cs, true
+	return cs, len(cs) != 0
 }
 
 // permanents 常時開催のコンテスト情報テーブルを辿ってパース
