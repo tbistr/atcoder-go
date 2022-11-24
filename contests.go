@@ -4,15 +4,16 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 type Contest struct {
 	Name  string
-	href  string // like "/contests/abc123"
+	ID    string // like "abc123"
 	Kind  string // like "Algorithm", "Heuristics"...
-	State string // "permanent", "upcoming",
+	State string // "permanent", "upcoming", "archive"
 	// TODO: StateをEnumに
 }
 
@@ -89,7 +90,7 @@ func permanents(doc *goquery.Document) (contests []*Contest, err error) {
 			kind, _ := span.Attr("title")
 			contests = append(contests, &Contest{
 				Name:  name,
-				href:  href,
+				ID:    strings.TrimPrefix(href, "/contests/"),
 				Kind:  kind,
 				State: "permanent",
 			})
@@ -110,7 +111,7 @@ func upcomings(doc *goquery.Document) (contests []*Contest, err error) {
 			kind, _ := span.Attr("title")
 			contests = append(contests, &Contest{
 				Name:  name,
-				href:  href,
+				ID:    strings.TrimPrefix(href, "/contests/"),
 				Kind:  kind,
 				State: "upcoming",
 			})
@@ -131,7 +132,7 @@ func archives(doc *goquery.Document) (contests []*Contest, err error) {
 			kind, _ := span.Attr("title")
 			contests = append(contests, &Contest{
 				Name:  name,
-				href:  href,
+				ID:    strings.TrimPrefix(href, "/contests/"),
 				Kind:  kind,
 				State: "archive",
 			})

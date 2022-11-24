@@ -32,3 +32,11 @@ func (b base) contests() *url.URL {
 func (b base) contestsArchive() *url.URL {
 	return b.contests().JoinPath("archive")
 }
+
+func (b base) contestTop(id string) *url.URL {
+	return b.contests().JoinPath(id)
+}
+
+func (b base) contestTasks(id string) *url.URL {
+	return b.contestTop(id).JoinPath("tasks")
+}
