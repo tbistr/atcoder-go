@@ -1,0 +1,13 @@
+{
+    // terminal settings
+    "terminal.integrated.profiles.linux": {
+        "fish": {
+            "path": "fish"
+        },
+        "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "fish",
+}
