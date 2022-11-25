@@ -39,5 +39,6 @@ func (c *Client) Login(username, password string) error {
 	if tryResp.StatusCode != http.StatusOK {
 		return fmt.Errorf("faild to login: %s", tryResp.Status)
 	}
+	c.token = token
 	return nil
 }

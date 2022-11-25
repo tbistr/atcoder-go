@@ -7,6 +7,7 @@ import (
 
 type Client struct {
 	*http.Client
+	token string
 }
 
 func NewClient() (*Client, error) {
@@ -16,5 +17,6 @@ func NewClient() (*Client, error) {
 	}
 	return &Client{
 		&http.Client{Jar: jar},
+		"",
 	}, nil
 }
