@@ -37,6 +37,10 @@ func (b base) contestTop(id string) *url.URL {
 	return b.contests().JoinPath(id)
 }
 
-func (b base) contestTasks(id string) *url.URL {
-	return b.contestTop(id).JoinPath("tasks")
+func (b base) Tasks(contestID string) *url.URL {
+	return b.contestTop(contestID).JoinPath("tasks")
+}
+
+func (b base) Task(contestID, taskID string) *url.URL {
+	return b.Tasks(contestID).JoinPath(taskID)
 }
