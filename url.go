@@ -44,3 +44,7 @@ func (b base) Tasks(contestID string) *url.URL {
 func (b base) Task(contestID, taskID string) *url.URL {
 	return b.Tasks(contestID).JoinPath(taskID)
 }
+
+func (b base) Submit(contestID string) *url.URL {
+	return b.contestTop(contestID).JoinPath("submit")
+}

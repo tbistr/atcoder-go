@@ -1,6 +1,9 @@
 package atcodergo
 
 import (
+	"fmt"
+	"io"
+	"net/url"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -71,4 +74,30 @@ func (c *Client) TestCases(contestID, taskID string) ([]*TestCase, error) {
 	})
 
 	return tcs, nil
+}
+
+func (c *Client) Submit(contest *Contest, task *Task, program io.Reader, languageID string) error {
+	u := BASE_URL.Submit(contest.ID)
+	v := url.Values{}
+	v.Set("data.TaskScreenName", task.ID)
+	v.Set("data.LanguageId", languageID)
+	b, err := io.ReadAll(program)
+	if err != nil {
+		return err
+	}
+	v.Set("sourceCode", string(b))
+	v.Set("csrf_token", c.token)
+	resp, err := c.PostForm(u.String(), v)
+	if err != nil {
+		return err
+	}
+	b, _ = io.ReadAll(resp.Body)
+	fmt.Println(resp.Status)
+	fmt.Println(string(b))
+
+	return nil
+}
+
+func (c *Client) Languages() (map[string]string, error) {
+	return map[string]string{"4006": "Python (3.4.3)"}, nil
 }
