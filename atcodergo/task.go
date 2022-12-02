@@ -9,16 +9,19 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// Task
 type Task struct {
 	Name   string
 	IdName string // "A", "90"...
 	ID     string // "abc123_a", "typical90_cl"...
 }
 
+// TestCase for Task
 type TestCase struct{ Input, Output string }
 
+// Tasks gets tasks of the contest.
 func (c *Client) Tasks(contestID string) ([]*Task, error) {
-	u := BASE_URL.Tasks(contestID)
+	u := BASE_URL.tasks(contestID)
 	resp, err := c.Get(u.String())
 	if err != nil {
 		return nil, err
@@ -52,8 +55,9 @@ func (c *Client) Tasks(contestID string) ([]*Task, error) {
 	return tasks, nil
 }
 
+// TestCases gets testcases of the task.
 func (c *Client) TestCases(contestID, taskID string) ([]*TestCase, error) {
-	u := BASE_URL.Task(contestID, taskID)
+	u := BASE_URL.task(contestID, taskID)
 	resp, err := c.Get(u.String())
 	if err != nil {
 		return nil, err
@@ -76,8 +80,9 @@ func (c *Client) TestCases(contestID, taskID string) ([]*TestCase, error) {
 	return tcs, nil
 }
 
+// Submit answer program for the task.
 func (c *Client) Submit(contest *Contest, task *Task, program io.Reader, languageID string) error {
-	u := BASE_URL.Submit(contest.ID)
+	u := BASE_URL.submit(contest.ID)
 	v := url.Values{}
 	v.Set("data.TaskScreenName", task.ID)
 	v.Set("data.LanguageId", languageID)
