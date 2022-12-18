@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -50,4 +51,32 @@ func (c *Client) Login(username, password string) error {
 		c.token = token
 		return nil
 	}
+}
+
+// LoginWithNewSession try to login to atcoder.
+// File contents are overwritten.
+func (c *Client) LoginWithNewSession(username, password, file string) error {
+	if err := c.Login(username, password); err != nil {
+		return err
+	}
+
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+
+	if err := c.writeCookie(f); err != nil {
+		return err
+	}
+	return f.Close()
+}
+
+func (c *Client) LoginWithSession(file string) error {
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return c.readCookie(f)
 }
