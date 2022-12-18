@@ -35,15 +35,15 @@ func (c *Client) Tasks(contestID string) ([]*Task, error) {
 	tasks := make([]*Task, 0, 10)
 	doc.Find("table > tbody >tr").Each(func(i int, s *goquery.Selection) {
 		as := s.Find("td > a")
-		td1 := as.First()
+		col1 := as.Eq(0)
 
-		href, _ := td1.Attr("href")
+		href, _ := col1.Attr("href")
 		id := strings.Trim(href, "/")
 		id = id[strings.LastIndex(id, "/")+1:]
-		idName := td1.Text()
+		idName := col1.Text()
 
-		td2 := as.Last()
-		name := td2.Text()
+		col2 := as.Eq(1)
+		name := col2.Text()
 
 		tasks = append(tasks, &Task{
 			Name:   name,

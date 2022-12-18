@@ -11,6 +11,7 @@ import (
 
 // Login to atcoder.
 // save csrf_token to client.
+// TODO: ログイン失敗時のエラー出力
 func (c *Client) Login(username, password string) error {
 
 	// get csrf_token
