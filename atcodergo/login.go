@@ -3,15 +3,15 @@ package atcodergo
 import (
 	"errors"
 	"fmt"
-	"net/http"
+	"io"
 	"net/url"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 // Login to atcoder.
 // save csrf_token to client.
-// TODO: ログイン失敗時のエラー出力
 func (c *Client) Login(username, password string) error {
 
 	// get csrf_token
@@ -39,9 +39,15 @@ func (c *Client) Login(username, password string) error {
 		return err
 	}
 	defer tryResp.Body.Close()
-	if tryResp.StatusCode != http.StatusOK {
-		return fmt.Errorf("faild to login: %s", tryResp.Status)
+
+	b, err := io.ReadAll(tryResp.Body)
+	if err != nil {
+		return err
 	}
-	c.token = token
-	return nil
+	if strings.Contains(string(b), "ユーザ名またはパスワードが正しくありません。") {
+		return fmt.Errorf("faild to login")
+	} else {
+		c.token = token
+		return nil
+	}
 }
