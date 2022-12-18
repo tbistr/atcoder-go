@@ -9,6 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// Contest has Name, ID, Kind, State.
 type Contest struct {
 	Name  string
 	ID    string // like "abc123"
@@ -17,11 +18,14 @@ type Contest struct {
 	// TODO: StateをEnumに
 }
 
+// ContestsPager is pager for contests.
+// Atcoder's website serves contests list with pagenation.
 type ContestsPager struct {
 	client *Client
 	page   int
 }
 
+// NewContestsPager creates new ContestsPager.
 func (c *Client) NewContestsPager() *ContestsPager {
 	return &ContestsPager{
 		client: c,
@@ -29,6 +33,7 @@ func (c *Client) NewContestsPager() *ContestsPager {
 	}
 }
 
+// Next returns next page's contests.
 func (pager *ContestsPager) Next() (contests []*Contest, ok bool) {
 	u := BASE_URL.contests()
 

@@ -9,9 +9,11 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// Login to atcoder.
+// save csrf_token to client.
 func (c *Client) Login(username, password string) error {
 
-	// csrf_tokenの取得
+	// get csrf_token
 	tokenResp, err := c.Get(BASE_URL.login().String())
 	if err != nil {
 		return err
@@ -26,7 +28,7 @@ func (c *Client) Login(username, password string) error {
 		return errors.New("csrf_token not found")
 	}
 
-	// ログインリクエスト
+	// login request
 	values := url.Values{}
 	values.Set("username", username)
 	values.Set("password", password)

@@ -21,30 +21,37 @@ func init() {
 // 	return &b.URL
 // }
 
+// login = ~/login
 func (b base) login() *url.URL {
 	return b.URL.JoinPath("login")
 }
 
+// contests = ~/contests
 func (b base) contests() *url.URL {
 	return b.URL.JoinPath("contests")
 }
 
+// contestsArchive = ~/contests/archive
 func (b base) contestsArchive() *url.URL {
 	return b.contests().JoinPath("archive")
 }
 
-func (b base) contestTop(id string) *url.URL {
+// contest = ~/contests/{id}
+func (b base) contest(id string) *url.URL {
 	return b.contests().JoinPath(id)
 }
 
-func (b base) Tasks(contestID string) *url.URL {
-	return b.contestTop(contestID).JoinPath("tasks")
+// tasks = ~/contests/{id}
+func (b base) tasks(contestID string) *url.URL {
+	return b.contest(contestID).JoinPath("tasks")
 }
 
-func (b base) Task(contestID, taskID string) *url.URL {
-	return b.Tasks(contestID).JoinPath(taskID)
+// task = ~/contests/{contestID}/{taskID}
+func (b base) task(contestID, taskID string) *url.URL {
+	return b.tasks(contestID).JoinPath(taskID)
 }
 
-func (b base) Submit(contestID string) *url.URL {
-	return b.contestTop(contestID).JoinPath("submit")
+// submit = ~/contests/{contestID}/submit
+func (b base) submit(contestID string) *url.URL {
+	return b.contest(contestID).JoinPath("submit")
 }
