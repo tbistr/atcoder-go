@@ -1,40 +1,49 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"os"
+	"syscall"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
+)
+
+var (
+	sessionFile string
 )
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("login called")
-	},
+	Short: "login to AtCoder",
+	Long:  `Login to AtCoder.`,
+	Run:   login,
 }
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	// Here you will define your flags and configuration settings.
+	loginCmd.Flags().StringVarP(&sessionFile, "session", "s", ".atcoder_session", "Filename for keep session.")
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// loginCmd.PersistentFlags().String("foo", "", "A help for foo")
+func login(cmd *cobra.Command, args []string) {
+	if client.LoginWithSession(sessionFile) != nil {
+		// hear username, password
+		var u, p string
+		fmt.Fprint(os.Stderr, "enter username:")
+		fmt.Scanln(&u)
+		fmt.Fprint(os.Stderr, "enter password:")
+		b, _ := term.ReadPassword(int(syscall.Stdin))
+		p = string(b)
+		fmt.Fprint(os.Stderr, "\n")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+		if err := client.LoginWithNewSession(u, p, sessionFile); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
 }
