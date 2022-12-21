@@ -1,3 +1,5 @@
+// cmd is package to parse args and options.
+// Does not have any implementation.
 package cmd
 
 import (
@@ -5,10 +7,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/tbistr/atcoder-go/atcodergo"
+	"github.com/tbistr/atcoder-go/cmd/handler"
 )
 
-var client *atcodergo.Client
+var h *handler.Handler
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -32,9 +34,9 @@ func init() {
 
 func initClient() {
 	var err error
-	client, err = atcodergo.NewClient()
+	h, err = handler.New()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "failed to init atcoder-go library")
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
