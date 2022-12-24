@@ -26,7 +26,7 @@ func (c *Client) Tasks(contestID string) ([]*Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer readAllClose(resp.Body)
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
@@ -62,7 +62,7 @@ func (c *Client) TestCases(contestID, taskID string) ([]*TestCase, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer readAllClose(resp.Body)
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ func (c *Client) Languages() ([]Language, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer readAllClose(resp.Body)
 
 	Languages := []Language{}
 	doc, err := goquery.NewDocumentFromReader(resp.Body)

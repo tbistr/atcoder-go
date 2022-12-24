@@ -20,7 +20,7 @@ func (c *Client) Login(username, password string) error {
 	if err != nil {
 		return err
 	}
-	defer tokenResp.Body.Close()
+	defer readAllClose(tokenResp.Body)
 	doc, err := goquery.NewDocumentFromReader(tokenResp.Body)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func (c *Client) Login(username, password string) error {
 	if err != nil {
 		return err
 	}
-	defer tryResp.Body.Close()
+	defer readAllClose(tokenResp.Body)
 
 	b, err := io.ReadAll(tryResp.Body)
 	if err != nil {

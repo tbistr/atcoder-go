@@ -48,7 +48,7 @@ func (pager *ContestsPager) Next() (contests []*Contest, ok bool) {
 	if err != nil {
 		return nil, false
 	}
-	defer resp.Body.Close()
+	defer readAllClose(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		return nil, false
 	}
