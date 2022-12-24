@@ -1,7 +1,6 @@
 package atcodergo
 
 import (
-	"fmt"
 	"io"
 	"net/url"
 	"strings"
@@ -96,9 +95,7 @@ func (c *Client) Submit(contestID, taskID string, languageID string, program io.
 	if err != nil {
 		return err
 	}
-	b, _ = io.ReadAll(resp.Body)
-	fmt.Println(resp.Status)
-	fmt.Println(string(b))
+	defer readAllClose(resp.Body)
 
 	return nil
 }

@@ -2,11 +2,9 @@ package atcodergo
 
 import (
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -16,40 +14,25 @@ import (
 func (c *Client) Login(username, password string) error {
 
 	// get csrf_token
-	tokenResp, err := c.Get(BASE_URL.login().String())
-	if err != nil {
+	if err := c.getCSRF(); err != nil {
 		return err
-	}
-	defer readAllClose(tokenResp.Body)
-	doc, err := goquery.NewDocumentFromReader(tokenResp.Body)
-	if err != nil {
-		return err
-	}
-	token, exist := doc.Find("input[name=csrf_token]").Attr("value")
-	if !exist {
-		return errors.New("csrf_token not found")
 	}
 
 	// login request
 	values := url.Values{}
 	values.Set("username", username)
 	values.Set("password", password)
-	values.Set("csrf_token", token)
+	values.Set("csrf_token", c.token)
 	tryResp, err := c.PostForm(BASE_URL.login().String(), values)
 	if err != nil {
 		return err
 	}
-	defer readAllClose(tokenResp.Body)
+	defer readAllClose(tryResp.Body)
 
-	b, err := io.ReadAll(tryResp.Body)
-	if err != nil {
-		return err
-	}
-	if strings.Contains(string(b), "ユーザ名またはパスワードが正しくありません。") {
-		return errors.New("faild to login")
-	} else {
-		c.token = token
+	if c.checkLoggedin() {
 		return nil
+	} else {
+		return errors.New("faild to login")
 	}
 }
 
@@ -115,6 +98,28 @@ func (c *Client) LoginWithSession(file string) error {
 	}
 
 	c.sessionFile = file
+	return c.getCSRF()
+}
+
+// getCSRF gets csrf_token from atcoder top page.
+// Overwrite Client.token.
+func (c *Client) getCSRF() error {
+	tokenResp, err := c.Get(BASE_URL.String())
+	if err != nil {
+		return err
+	}
+	defer readAllClose(tokenResp.Body)
+
+	doc, err := goquery.NewDocumentFromReader(tokenResp.Body)
+	if err != nil {
+		return err
+	}
+	token, exist := doc.Find("input[name=csrf_token]").Attr("value")
+	if !exist {
+		return errors.New("csrf_token not found")
+	}
+
+	c.token = token
 	return nil
 }
 
