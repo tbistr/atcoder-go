@@ -81,10 +81,10 @@ func (c *Client) TestCases(contestID, taskID string) ([]*TestCase, error) {
 }
 
 // Submit answer program for the task.
-func (c *Client) Submit(contest *Contest, task *Task, program io.Reader, languageID string) error {
-	u := BASE_URL.submit(contest.ID)
+func (c *Client) Submit(contestID, taskID string, languageID string, program io.Reader) error {
+	u := BASE_URL.submit(contestID)
 	v := url.Values{}
-	v.Set("data.TaskScreenName", task.ID)
+	v.Set("data.TaskScreenName", taskID)
 	v.Set("data.LanguageId", languageID)
 	b, err := io.ReadAll(program)
 	if err != nil {
@@ -103,6 +103,38 @@ func (c *Client) Submit(contest *Contest, task *Task, program io.Reader, languag
 	return nil
 }
 
-func (c *Client) Languages() (map[string]string, error) {
-	return map[string]string{"4006": "Python (3.4.3)"}, nil
+// Language stand for
+// "<option value={Language.Value} data-mime={Language.Datamime}>{Language.Text}</option>"
+type Language struct {
+	Value    string
+	Datamime string
+	Text     string
+}
+
+// Languages lists up acceptable languages.
+func (c *Client) Languages() ([]Language, error) {
+	resp, err := c.Get(BASE_URL.submit("practice").String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	Languages := []Language{}
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	doc.Find("#select-lang-practice_1 > select > option").Each(func(i int, s *goquery.Selection) {
+		// index-0 == "<option></option>"
+		if i == 0 {
+			return
+		}
+		// else is "<option value="4001" data-mime="text/x-csrc">C (GCC 9.2.1)</option>"
+		value, _ := s.Attr("value")
+		datamime, _ := s.Attr("data-mime")
+		text := s.Text()
+		Languages = append(Languages, Language{Value: value, Datamime: datamime, Text: text})
+	})
+
+	return Languages, nil
 }
