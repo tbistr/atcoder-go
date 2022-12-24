@@ -15,8 +15,6 @@ Directoriy -> description
 ## TODOs
 
 - add tests
-- guard for methods which need loggedin
-  - now, some func returns nil or []Some{}
 - set log level
   - and actualy output logs
 - use global config

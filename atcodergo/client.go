@@ -13,6 +13,7 @@ type Client struct {
 	*http.Client
 	token       string
 	sessionFile string
+	loggedin    bool
 }
 
 // NewClient create new Client.
@@ -23,7 +24,7 @@ func NewClient() (*Client, error) {
 	}
 	return &Client{
 		Client:   &http.Client{Jar: jar},
-		"",
+		loggedin: false,
 	}, nil
 }
 

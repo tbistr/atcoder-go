@@ -20,6 +20,10 @@ type TestCase struct{ Input, Output string }
 
 // Tasks gets tasks of the contest.
 func (c *Client) Tasks(contestID string) ([]*Task, error) {
+	if !c.loggedin {
+		return nil, newNeedAuthError("Tasks()")
+	}
+
 	u := BASE_URL.tasks(contestID)
 	resp, err := c.Get(u.String())
 	if err != nil {
@@ -56,6 +60,10 @@ func (c *Client) Tasks(contestID string) ([]*Task, error) {
 
 // TestCases gets testcases of the task.
 func (c *Client) TestCases(contestID, taskID string) ([]*TestCase, error) {
+	if !c.loggedin {
+		return nil, newNeedAuthError("TestCases()")
+	}
+
 	u := BASE_URL.task(contestID, taskID)
 	resp, err := c.Get(u.String())
 	if err != nil {
@@ -81,6 +89,10 @@ func (c *Client) TestCases(contestID, taskID string) ([]*TestCase, error) {
 
 // Submit answer program for the task.
 func (c *Client) Submit(contestID, taskID string, languageID string, program io.Reader) error {
+	if !c.loggedin {
+		return newNeedAuthError("Submit()")
+	}
+
 	u := BASE_URL.submit(contestID)
 	v := url.Values{}
 	v.Set("data.TaskScreenName", taskID)
@@ -110,6 +122,10 @@ type Language struct {
 
 // Languages lists up acceptable languages.
 func (c *Client) Languages() ([]Language, error) {
+	if !c.loggedin {
+		return nil, newNeedAuthError("Languages()")
+	}
+
 	resp, err := c.Get(BASE_URL.submit("practice").String())
 	if err != nil {
 		return nil, err

@@ -30,6 +30,7 @@ func (c *Client) Login(username, password string) error {
 	defer readAllClose(tryResp.Body)
 
 	if c.checkLoggedin() {
+		c.loggedin = true
 		return nil
 	} else {
 		return errors.New("faild to login")
@@ -47,6 +48,7 @@ func (c *Client) Logout() error {
 	}
 	defer readAllClose(r.Body)
 	c.token = ""
+	c.loggedin = false
 
 	if c.sessionFile == "" {
 		return nil
@@ -77,6 +79,7 @@ func (c *Client) LoginWithNewSession(username, password, file string) error {
 	}
 
 	c.sessionFile = file
+	c.loggedin = true
 	return f.Close()
 }
 
@@ -98,6 +101,7 @@ func (c *Client) LoginWithSession(file string) error {
 	}
 
 	c.sessionFile = file
+	c.loggedin = true
 	return c.getCSRF()
 }
 

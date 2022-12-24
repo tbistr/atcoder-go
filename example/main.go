@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -36,6 +37,16 @@ func main() {
 	// submits program to practice contest, task A
 	// ⚠️ THIS EXAMPLE WILL ACTUALY SUBMIT PROGRAM ⚠️
 	// submitExample(c)
+
+	// logout
+	c.Logout()
+
+	// error handling
+	_, err := c.Tasks("hoge")
+	var needAuth *atcodergo.NeedAuthError
+	if errors.As(err, &needAuth) {
+		fmt.Println(needAuth)
+	}
 }
 
 func loginExample(c *atcodergo.Client) {
