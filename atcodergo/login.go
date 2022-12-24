@@ -106,12 +106,16 @@ func (c *Client) LoginWithSession(file string) error {
 	}
 	defer f.Close()
 
+	if err := c.readCookie(f); err != nil {
+		return err
+	}
+
 	if !c.checkLoggedin() {
 		return errors.New("faild to login")
 	}
 
 	c.sessionFile = file
-	return c.readCookie(f)
+	return nil
 }
 
 // checkLoggedin checks if logged in or not
