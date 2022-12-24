@@ -2,8 +2,8 @@ package atcodergo
 
 import (
 	"errors"
-	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -46,10 +46,34 @@ func (c *Client) Login(username, password string) error {
 		return err
 	}
 	if strings.Contains(string(b), "ユーザ名またはパスワードが正しくありません。") {
-		return fmt.Errorf("faild to login")
+		return errors.New("faild to login")
 	} else {
 		c.token = token
 		return nil
+	}
+}
+
+// Logout from atcoder.
+// Removes session file if exists.
+func (c *Client) Logout() error {
+	values := url.Values{}
+	values.Set("csrf_token", c.token)
+	r, err := c.PostForm(BASE_URL.logout().String(), values)
+	if err != nil {
+		return err
+	}
+	defer readAllClose(r.Body)
+	c.token = ""
+
+	if c.sessionFile == "" {
+		return nil
+	} else {
+		f, err := os.Create(c.sessionFile)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		return c.writeCookie(f)
 	}
 }
 
@@ -68,9 +92,13 @@ func (c *Client) LoginWithNewSession(username, password, file string) error {
 	if err := c.writeCookie(f); err != nil {
 		return err
 	}
+
+	c.sessionFile = file
 	return f.Close()
 }
 
+// LoginWithSession try to login to atcoder.
+// File contents are only read.
 func (c *Client) LoginWithSession(file string) error {
 	f, err := os.Open(file)
 	if err != nil {
@@ -78,5 +106,22 @@ func (c *Client) LoginWithSession(file string) error {
 	}
 	defer f.Close()
 
+	if !c.checkLoggedin() {
+		return errors.New("faild to login")
+	}
+
+	c.sessionFile = file
 	return c.readCookie(f)
+}
+
+// checkLoggedin checks if logged in or not
+// by GET "https://atcoder.jp/contests/practice/tasks".
+// (404 if not authed.)
+func (c *Client) checkLoggedin() bool {
+	r, err := c.Get(BASE_URL.tasks("practice").String())
+	if err != nil {
+		return false
+	}
+	defer readAllClose(r.Body)
+	return r.StatusCode != http.StatusNotFound
 }

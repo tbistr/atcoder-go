@@ -26,6 +26,11 @@ func (b base) login() *url.URL {
 	return b.URL.JoinPath("login")
 }
 
+// logout = ~/logout
+func (b base) logout() *url.URL {
+	return b.URL.JoinPath("logout")
+}
+
 // contests = ~/contests
 func (b base) contests() *url.URL {
 	return b.URL.JoinPath("contests")

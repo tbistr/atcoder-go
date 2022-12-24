@@ -11,7 +11,8 @@ import (
 // available as http.Client
 type Client struct {
 	*http.Client
-	token string
+	token       string
+	sessionFile string
 }
 
 // NewClient create new Client.
@@ -21,7 +22,7 @@ func NewClient() (*Client, error) {
 		return nil, err
 	}
 	return &Client{
-		&http.Client{Jar: jar},
+		Client:   &http.Client{Jar: jar},
 		"",
 	}, nil
 }
