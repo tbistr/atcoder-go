@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	h           *handler.Handler
-	sessionFile string
-	configFile  string
+	h          *handler.Handler
+	configFile string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -35,11 +34,6 @@ func init() {
 	cobra.OnInitialize(initClient)
 
 	rootCmd.PersistentFlags().StringVar(
-		&sessionFile, "session",
-		configDir(".atcoder_session"),
-		"File for keep login session.")
-
-	rootCmd.PersistentFlags().StringVar(
 		&configFile, "config",
 		configDir("config.json"),
 		"Global config file(json).")
@@ -47,6 +41,11 @@ func init() {
 
 func initClient() {
 	var err error
-	h, err = handler.New(sessionFile)
+	h, err = handler.New(
+		configFile,
+		&handler.GlobalConfig{
+			SessionFile: configDir(".atcoder_session"),
+		},
+	)
 	exit1withE(err)
 }

@@ -7,18 +7,24 @@ import (
 )
 
 type Handler struct {
-	atcoder     *atcodergo.Client
-	sessionFile string
+	atcoder    *atcodergo.Client
+	configFile string
+	config     *GlobalConfig
 }
 
-func New(sessionFile string) (*Handler, error) {
+func New(configFile string, defauldConfig *GlobalConfig) (*Handler, error) {
 	a, err := atcodergo.NewClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to init atcoder-go library: %w", err)
 	}
 
+	c, err := touchReadConfig(configFile, defauldConfig)
+	if err != nil {
+		return nil, err
+	}
 	return &Handler{
-		atcoder:     a,
-		sessionFile: sessionFile,
+		atcoder:    a,
+		configFile: configFile,
+		config:     c,
 	}, nil
 }
