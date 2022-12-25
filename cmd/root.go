@@ -3,14 +3,17 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/tbistr/atcoder-go/cmd/handler"
 )
 
-var h *handler.Handler
+var (
+	h           *handler.Handler
+	sessionFile string
+	configFile  string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -30,13 +33,20 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initClient)
+
+	rootCmd.PersistentFlags().StringVar(
+		&sessionFile, "session",
+		configDir(".atcoder_session"),
+		"File for keep login session.")
+
+	rootCmd.PersistentFlags().StringVar(
+		&configFile, "config",
+		configDir("config.json"),
+		"Global config file(json).")
 }
 
 func initClient() {
 	var err error
-	h, err = handler.New()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	h, err = handler.New(sessionFile)
+	exit1withE(err)
 }

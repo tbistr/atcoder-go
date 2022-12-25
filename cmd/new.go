@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -17,10 +14,8 @@ var newCmd = &cobra.Command{
 	Short: "create directory and templates for contest",
 	Long:  `create directory and templates for contest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := h.NewContest(args[1], templateFile); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		// TODO: 引数のサイズチェック
+		exit1withE(h.NewContest(args[0], templateFile))
 	},
 }
 

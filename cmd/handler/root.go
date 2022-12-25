@@ -7,15 +7,18 @@ import (
 )
 
 type Handler struct {
-	atcoder *atcodergo.Client
+	atcoder     *atcodergo.Client
+	sessionFile string
 }
 
-func New() (*Handler, error) {
+func New(sessionFile string) (*Handler, error) {
 	a, err := atcodergo.NewClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to init atcoder-go library: %w", err)
 	}
+
 	return &Handler{
-		atcoder: a,
+		atcoder:     a,
+		sessionFile: sessionFile,
 	}, nil
 }
