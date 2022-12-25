@@ -1,6 +1,7 @@
 # atcoder-go
 
 This is go-library and cli-tool for [atcoder.jp](https://atcoder.jp/).
+*Under development.*
 
 ## Architecture and develop environment
 
