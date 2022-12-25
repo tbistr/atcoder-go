@@ -21,5 +21,6 @@ var newCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(newCmd)
-	rootCmd.Flags().StringVar(&templateFile, "template", ".template", "template file for each problem")
+
+	newCmd.Flags().StringVar(&templateFile, "template", ".template", "template file for each problem")
 }
