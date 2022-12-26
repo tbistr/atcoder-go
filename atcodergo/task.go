@@ -1,7 +1,9 @@
 package atcodergo
 
 import (
+	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -30,6 +32,13 @@ func (c *Client) Tasks(contestID string) ([]*Task, error) {
 		return nil, err
 	}
 	defer readAllClose(resp.Body)
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("no such contest: %s", contestID)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("cant access tasks, status not ok: %s", resp.Status)
+	}
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
