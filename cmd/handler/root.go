@@ -22,6 +22,8 @@ func New(configFile string, defauldConfig *GlobalConfig) (*Handler, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	a.LoginWithSession(c.SessionFile)
 	return &Handler{
 		atcoder:    a,
 		configFile: configFile,

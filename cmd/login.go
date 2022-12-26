@@ -8,8 +8,9 @@ import (
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "login to AtCoder",
-	Long:  `Login to AtCoder.`,
-	Run:   func(cmd *cobra.Command, args []string) { exit1withE(h.Login()) },
+	Long: `Login to AtCoder.
+Create a file to keep session.`,
+	Run: func(cmd *cobra.Command, args []string) { exit1withE(h.Login()) },
 }
 
 func init() {

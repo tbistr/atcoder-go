@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 type GlobalConfig struct {
@@ -44,7 +44,7 @@ func readConfig(configFile string) (*GlobalConfig, error) {
 }
 
 func writeConfig(configFile string, config *GlobalConfig) error {
-	if err := os.MkdirAll(path.Dir(configFile), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(configFile), 0755); err != nil {
 		return err
 	}
 	b, err := json.MarshalIndent(config, "", "  ")

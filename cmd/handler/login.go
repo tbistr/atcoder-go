@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"syscall"
 
 	"golang.org/x/term"
@@ -19,7 +19,7 @@ func (h *Handler) Login() error {
 	p = string(b)
 	fmt.Fprint(os.Stderr, "\n")
 
-	if err := os.MkdirAll(path.Dir(h.config.SessionFile), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(h.config.SessionFile), 0755); err != nil {
 		return err
 	}
 	return h.atcoder.LoginWithNewSession(u, p, h.config.SessionFile)
