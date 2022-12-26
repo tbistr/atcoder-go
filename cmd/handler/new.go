@@ -54,13 +54,15 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 		return err
 	}
 
-	program := `package main
-import "fmt"
-func main(){
-	fmt.Println("hoge")
-}
-`
-	if err := os.WriteFile(filepath.Join(taskDir, "main.go"), []byte(program), 0644); err != nil {
+	template, err := os.ReadFile(h.config.TemplateFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to read template: %s: %s \n", h.config.TemplateFile, err)
+	}
+	mainFile := h.config.MainFileName
+	if mainFile == "" {
+		mainFile = "main.go"
+	}
+	if err := os.WriteFile(filepath.Join(taskDir, mainFile), template, 0644); err != nil {
 		return err
 	}
 

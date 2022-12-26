@@ -10,4 +10,7 @@
         }
     },
     "terminal.integrated.defaultProfile.linux": "fish",
+    "go.addTags": {
+        "options": ""
+    },
 }

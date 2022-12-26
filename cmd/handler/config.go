@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 )
 
 type GlobalConfig struct {
-	SessionFile string `json:"session_file"`
+	SessionFile  string `json:"session_file"`
+	TemplateFile string `json:"template_file"`
+	MainFileName string `json:"main_file_name"`
 }
 
 // ShowGlobalConfig shows global config.
@@ -19,7 +22,12 @@ func (h *Handler) ShowGlobalConfig() error {
 		return err
 	}
 
-	fmt.Printf("session_file: %s\n", c.SessionFile)
+	t := reflect.TypeOf(*c)
+	v := reflect.ValueOf(c)
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		fmt.Printf("%s: %s\n", f.Tag.Get("json"), v.Elem().FieldByName(f.Name))
+	}
 
 	return nil
 }
