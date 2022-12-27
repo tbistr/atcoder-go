@@ -32,7 +32,7 @@ func main() {
 	listTasksExample(c)
 
 	// lists testcases of practice contest, task A
-	listTestcasesExample(c)
+	listTaskInfoExample(c)
 
 	// submits program to practice contest, task A
 	// ⚠️ THIS EXAMPLE WILL ACTUALY SUBMIT PROGRAM ⚠️
@@ -90,7 +90,7 @@ func listTasksExample(c *atcodergo.Client) {
 	pp.Println(tasks)
 }
 
-func listTestcasesExample(c *atcodergo.Client) {
+func listTaskInfoExample(c *atcodergo.Client) {
 	pager := c.NewContestsPager()
 	contests, _ := pager.Next()
 	practice := contests[0]
@@ -102,12 +102,14 @@ func listTestcasesExample(c *atcodergo.Client) {
 		os.Exit(1)
 	}
 
-	testcases, err := c.TestCases(practice.ID, tasks[0].ID)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	for _, task := range tasks {
+		taskInfo, err := c.TaskInfo(practice.ID, task.ID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		pp.Println(taskInfo)
 	}
-	pp.Println(testcases)
 }
 
 func submitExample(c *atcodergo.Client) {

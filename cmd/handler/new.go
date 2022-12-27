@@ -66,7 +66,7 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 		return err
 	}
 
-	tcs, err := h.atcoder.TestCases(contestID, task.ID)
+	tis, err := h.atcoder.TaskInfo(contestID, task.ID)
 	if err != nil {
 		// テストケースのパースがダメだった可能性
 		// パースに自信がないので、正常終了
@@ -74,7 +74,7 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 		return nil
 	}
 
-	for i, tc := range tcs {
+	for i, tc := range tis.TestCases {
 		if err := os.WriteFile(
 			filepath.Join(taskDir, fmt.Sprintf("testcase%d.input", i+1)),
 			[]byte(tc.Input), 0644,

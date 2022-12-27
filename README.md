@@ -18,11 +18,10 @@ Directoriy -> description
 - add tests
 - set log level
   - and actualy output logs
-- use global config
-  - `~/.config/atgo/config.json`?
 - support custom template
   - use external program
   - generate boilerplate for each tasks
   - [input signeture] -> [custom program] -> [template]
 - show submit results
   - lib-level and cli-level
+- switch language (jp or en)
