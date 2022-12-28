@@ -10,9 +10,12 @@ import (
 )
 
 type GlobalConfig struct {
-	SessionFile  string `json:"session_file"`
-	TemplateFile string `json:"template_file"`
-	MainFileName string `json:"main_file_name"`
+	SessionFile          string   `json:"session_file"`
+	TemplateCmdName      string   `json:"template_cmd_name"`
+	TemplateCmdArgs      []string `json:"template_cmd_args"`
+	TemplateCmdJsonInput bool     `json:"template_cmd_json_input"`
+	TemplateFile         string   `json:"template_file"`
+	MainFileName         string   `json:"main_file_name"`
 }
 
 // ShowGlobalConfig shows global config.
@@ -37,6 +40,8 @@ func (h *Handler) ShowGlobalConfig() error {
 func touchReadConfig(configFile string, defaultC *GlobalConfig) (*GlobalConfig, error) {
 	c, err := readConfig(configFile)
 	if errors.Is(err, os.ErrNotExist) {
+		f, _ := os.OpenFile(defaultC.TemplateFile, os.O_CREATE, 0644)
+		f.Close()
 		return defaultC, writeConfig(configFile, defaultC)
 	}
 	return c, err

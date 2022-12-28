@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/tbistr/atcoder-go/atcodergo"
 )
@@ -54,27 +58,18 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 		return err
 	}
 
-	template, err := os.ReadFile(h.config.TemplateFile)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to read template: %s: %s \n", h.config.TemplateFile, err)
-	}
-	mainFile := h.config.MainFileName
-	if mainFile == "" {
-		mainFile = "main.go"
-	}
-	if err := os.WriteFile(filepath.Join(taskDir, mainFile), template, 0644); err != nil {
-		return err
-	}
-
-	tis, err := h.atcoder.TaskInfo(contestID, task.ID)
+	ti, err := h.atcoder.TaskInfo(contestID, task.ID)
 	if err != nil {
 		// テストケースのパースがダメだった可能性
 		// パースに自信がないので、正常終了
 		fmt.Fprintln(os.Stderr, err)
 		return nil
 	}
+	if err := h.mkTemplateFile(taskDir, ti); err != nil {
+		return err
+	}
 
-	for i, tc := range tis.TestCases {
+	for i, tc := range ti.TestCases {
 		if err := os.WriteFile(
 			filepath.Join(taskDir, fmt.Sprintf("testcase%d.input", i+1)),
 			[]byte(tc.Input), 0644,
@@ -90,4 +85,38 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 	}
 
 	return nil
+}
+
+// mkTemplateFile makes template file for each task.
+// [input signature or task info(json)] > [template cmd] > [template file]
+func (h *Handler) mkTemplateFile(taskDir string, info *atcodergo.TaskInfo) error {
+	mainFile := h.config.MainFileName
+	if mainFile == "" {
+		mainFile = "main.txt"
+	}
+
+	timeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	cmdExe := exec.CommandContext(timeout, h.config.TemplateCmdName, h.config.TemplateCmdArgs...)
+
+	if h.config.TemplateCmdJsonInput {
+		b, err := json.Marshal(info)
+		if err != nil {
+			return err
+		}
+		cmdExe.Stdin = strings.NewReader(string(b))
+	} else {
+		cmdExe.Stdin = strings.NewReader(info.IoStyle.InputSig)
+	}
+
+	template, err := cmdExe.Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed or timeout(10s) to run template generator: %s\nusing template file: %s\n", err, h.config.TemplateFile)
+		template, err = os.ReadFile(h.config.TemplateFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to read template file: %s \n", err)
+		}
+	}
+
+	return os.WriteFile(filepath.Join(taskDir, mainFile), template, 0644)
 }

@@ -44,9 +44,12 @@ func initClient() {
 	h, err = handler.New(
 		configFile,
 		&handler.GlobalConfig{
-			SessionFile:  configDir(".atcoder_session"),
-			TemplateFile: configDir("template"),
-			MainFileName: "main.go",
+			SessionFile:          configDir(".atcoder_session"),
+			TemplateCmdName:      "cat",
+			TemplateCmdArgs:      []string{},
+			TemplateCmdJsonInput: false,
+			TemplateFile:         configDir("template"),
+			MainFileName:         "main.go",
 		},
 	)
 	exit1withE(err)
