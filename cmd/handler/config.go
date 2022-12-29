@@ -7,15 +7,18 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"github.com/tbistr/atcoder-go/atcodergo"
 )
 
 type GlobalConfig struct {
-	SessionFile          string   `json:"session_file"`
-	TemplateCmdName      string   `json:"template_cmd_name"`
-	TemplateCmdArgs      []string `json:"template_cmd_args"`
-	TemplateCmdJsonInput bool     `json:"template_cmd_json_input"`
-	TemplateFile         string   `json:"template_file"`
-	MainFileName         string   `json:"main_file_name"`
+	SessionFile          string             `json:"session_file"`
+	TemplateCmdName      string             `json:"template_cmd_name"`
+	TemplateCmdArgs      []string           `json:"template_cmd_args"`
+	TemplateCmdJsonInput bool               `json:"template_cmd_json_input"`
+	TemplateFile         string             `json:"template_file"`
+	MainFileName         string             `json:"main_file_name"`
+	DefaultLanguage      atcodergo.Language `json:"default_language"`
 }
 
 // ShowGlobalConfig shows global config.
@@ -29,7 +32,7 @@ func (h *Handler) ShowGlobalConfig() error {
 	v := reflect.ValueOf(c)
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		fmt.Printf("%s: %s\n", f.Tag.Get("json"), v.Elem().FieldByName(f.Name))
+		fmt.Printf("%s: %#v\n", f.Tag.Get("json"), v.Elem().FieldByName(f.Name))
 	}
 
 	return nil

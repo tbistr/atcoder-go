@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/tbistr/atcoder-go/atcodergo"
 	"github.com/tbistr/atcoder-go/cmd/handler"
 )
 
@@ -50,6 +51,10 @@ func initClient() {
 			TemplateCmdJsonInput: false,
 			TemplateFile:         configDir("template"),
 			MainFileName:         "main.go",
+			DefaultLanguage: atcodergo.Language{
+				Value:    "4026",
+				Datamime: "text/x-go",
+				Text:     "Go (1.14.1)"},
 		},
 	)
 	exit1withE(err)

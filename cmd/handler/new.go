@@ -34,7 +34,7 @@ func (h *Handler) NewContest(contestID, templateFile string) error {
 	if err := os.MkdirAll(contestID, 0755); err != nil {
 		return err
 	}
-	if err := os.WriteFile(filepath.Join(contestID, "contest.json"), b, 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(contestID, CONTEST_META_FILE), b, 0644); err != nil {
 		return err
 	}
 
@@ -66,6 +66,21 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 		return nil
 	}
 	if err := h.mkTemplateFile(taskDir, ti); err != nil {
+		return err
+	}
+
+	taskMeta := &TaskMeta{
+		ContestID: contestID,
+		TaskID:    task.ID,
+	}
+	b, err := json.Marshal(taskMeta)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(
+		filepath.Join(taskDir, TASK_META_FILE),
+		b, 0644,
+	); err != nil {
 		return err
 	}
 
