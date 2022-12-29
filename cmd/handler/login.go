@@ -1,23 +1,23 @@
 package handler
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"syscall"
-
-	"golang.org/x/term"
 )
 
 func (h *Handler) Login() error {
 	// hear username, password
-	var u, p string
-	fmt.Fprint(os.Stderr, "enter username:")
-	fmt.Scanln(&u)
-	fmt.Fprint(os.Stderr, "enter password:")
-	b, _ := term.ReadPassword(int(syscall.Stdin))
-	p = string(b)
-	fmt.Fprint(os.Stderr, "\n")
+	u, err := prompt("enter username").Run()
+	if err != nil {
+		return err
+	}
+
+	prompt := prompt("enter password")
+	prompt.Mask = '*'
+	p, err := prompt.Run()
+	if err != nil {
+		return err
+	}
 
 	if err := os.MkdirAll(filepath.Dir(h.config.SessionFile), 0755); err != nil {
 		return err
