@@ -26,7 +26,10 @@ func (h *Handler) NewContest(contestID, templateFile string) error {
 	}
 
 	// make contest.json
-	cMeta := ContestMeta{ContestID: contestID}
+	cMeta := ContestMeta{
+		ContestID: contestID,
+		Tasks:     tasks,
+	}
 	b, err := json.Marshal(cMeta)
 	if err != nil {
 		return err
@@ -57,6 +60,11 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 	if err := os.Mkdir(taskDir, 0755); err != nil {
 		return err
 	}
+	mainFile := h.config.MainFileName
+	if mainFile == "" {
+		mainFile = "main.txt"
+	}
+	mainFilepath := filepath.Join(taskDir, mainFile)
 
 	ti, err := h.atcoder.TaskInfo(contestID, task.ID)
 	if err != nil {
@@ -65,13 +73,14 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 		fmt.Fprintln(os.Stderr, err)
 		return nil
 	}
-	if err := h.mkTemplateFile(taskDir, ti); err != nil {
+	if err := h.mkTemplateFile(mainFilepath, ti); err != nil {
 		return err
 	}
 
 	taskMeta := &TaskMeta{
 		ContestID: contestID,
-		TaskID:    task.ID,
+		Task:      task,
+		MainFile:  mainFile,
 	}
 	b, err := json.Marshal(taskMeta)
 	if err != nil {
@@ -104,12 +113,7 @@ func (h *Handler) mkTaskDir(contestID string, task *atcodergo.Task) error {
 
 // mkTemplateFile makes template file for each task.
 // [input signature or task info(json)] > [template cmd] > [template file]
-func (h *Handler) mkTemplateFile(taskDir string, info *atcodergo.TaskInfo) error {
-	mainFile := h.config.MainFileName
-	if mainFile == "" {
-		mainFile = "main.txt"
-	}
-
+func (h *Handler) mkTemplateFile(mainFilepath string, info *atcodergo.TaskInfo) error {
 	timeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	cmdExe := exec.CommandContext(timeout, h.config.TemplateCmdName, h.config.TemplateCmdArgs...)
@@ -133,5 +137,5 @@ func (h *Handler) mkTemplateFile(taskDir string, info *atcodergo.TaskInfo) error
 		}
 	}
 
-	return os.WriteFile(filepath.Join(taskDir, mainFile), template, 0644)
+	return os.WriteFile(mainFilepath, template, 0644)
 }
