@@ -2,9 +2,7 @@ package atcodergo
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -62,29 +60,4 @@ func (c *Client) Tasks(contestID string) ([]*Task, error) {
 	})
 
 	return tasks, nil
-}
-
-// Submit answer program for the task.
-func (c *Client) Submit(contestID, taskID string, languageID string, program io.Reader) error {
-	if !c.loggedin {
-		return newNeedAuthError("Submit()")
-	}
-
-	u := BASE_URL.submit(contestID)
-	v := url.Values{}
-	v.Set("data.TaskScreenName", taskID)
-	v.Set("data.LanguageId", languageID)
-	b, err := io.ReadAll(program)
-	if err != nil {
-		return err
-	}
-	v.Set("sourceCode", string(b))
-	v.Set("csrf_token", c.token)
-	resp, err := c.PostForm(u.String(), v)
-	if err != nil {
-		return err
-	}
-	defer readAllClose(resp.Body)
-
-	return nil
 }

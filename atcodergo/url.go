@@ -17,6 +17,13 @@ func init() {
 	BASE_URL = &base{*u}
 }
 
+// compareURL compares url without query
+func compareURL(a, b url.URL) bool {
+	a.RawQuery = ""
+	b.RawQuery = ""
+	return a == b
+}
+
 // func (b base) base() *url.URL {
 // 	return &b.URL
 // }
@@ -59,4 +66,14 @@ func (b base) task(contestID, taskID string) *url.URL {
 // submit = ~/contests/{contestID}/submit
 func (b base) submit(contestID string) *url.URL {
 	return b.contest(contestID).JoinPath("submit")
+}
+
+// submissions = ~/contests/{contestID}/submissions/me
+func (b base) submissions(contestID string) *url.URL {
+	return b.contest(contestID).JoinPath("submissions", "me")
+}
+
+// submission = ~/contests/{contestID}/submissions/{submitID}
+func (b base) submission(contestID, submitID string) *url.URL {
+	return b.contest(contestID).JoinPath("submissions", submitID)
 }
