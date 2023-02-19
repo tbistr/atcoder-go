@@ -21,7 +21,9 @@ Directoriy -> description
 - support custom template
   - use external program
   - generate boilerplate for each task
-  - [input signeture] -> [custom program] -> [template]
+  - [input signature] -> [custom program] -> [template]
 - show submit results
   - lib-level and CLI-level
 - switch language (jp or en)
+- create contest dir with interactive prompt
+- extract parse sections
