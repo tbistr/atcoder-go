@@ -40,8 +40,12 @@ func (c *Client) Submit(contestID, taskID string, languageID string, program io.
 		return nil, errors.New("failed to submit program")
 	}
 
-	submissions, ok := c.NewSubmissionsPager(contestID).Next()
-	if !ok || len(submissions) == 0 {
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	submissions := parseSubmissions(doc)
+	if len(submissions) == 0 {
 		return nil, errors.New("failed to get submission")
 	}
 
@@ -101,26 +105,32 @@ func (pager *SubmissionsPager) Next() (submissions []*Submission, ok bool) {
 		return nil, false
 	}
 
-	doc.Find("table > tbody >tr").Each(func(i int, tr *goquery.Selection) {
+	return parseSubmissions(doc), len(submissions) != 0
+}
+
+func parseSubmissions(doc *goquery.Document) []*Submission {
+	submissions := []*Submission{}
+	doc.Find("table > tbody > tr").Each(func(i int, tr *goquery.Selection) {
 		td := tr.Find("td")
-		if len(td.Nodes) != 10 || err != nil {
-			err = errors.New("failed to parse submissions")
+
+		inWJ := len(td.Nodes) == 8
+		if len(td.Nodes) != 10 && !inWJ {
 			return
 		}
 
 		// parse each td
-		// don't catch any errors
+		// doesn't catch any errors
 		// (will be empty)
 		submission := &Submission{}
 		td.Each(func(i int, s *goquery.Selection) {
-			switch i {
-			case 0: // Submission Time
+			switch {
+			case i == 0: // Submission Time
 				var err error
 				submission.Time, err = time.Parse("2006-01-02 15:04:05-0700", s.Text())
 				if err != nil {
 					submission.Time, _ = time.Parse("2006-01-02 15:04:05", s.Text())
 				}
-			case 1: // Task
+			case i == 1: // Task
 				// assumes href="/contests/practice/tasks/practice_1"
 				if href, exists := s.Children().First().Attr("href"); exists {
 					ss := strings.Split(href, "/")
@@ -129,7 +139,7 @@ func (pager *SubmissionsPager) Next() (submissions []*Submission, ok bool) {
 						submission.TaskName = ss[4]
 					}
 				}
-			case 2: // User
+			case i == 2: // User
 				// assumes href="/users/tbistr"
 				if href, exists := s.Children().First().Attr("href"); exists {
 					ss := strings.Split(href, "/")
@@ -137,19 +147,23 @@ func (pager *SubmissionsPager) Next() (submissions []*Submission, ok bool) {
 						submission.UserID = ss[2]
 					}
 				}
-			case 3:
+			case i == 3:
 				submission.LanguageName = s.Text()
-			case 4:
+			case i == 4:
 				submission.Score = s.Text()
-			case 5:
+			case i == 5:
 				submission.CodeSize = s.Text()
-			case 6:
+			case i == 6:
 				submission.Status = s.Text()
-			case 7:
+
+			// If status == WJ, ExecTime and Memory is empty.
+			case !inWJ && i == 7:
 				submission.ExecTime = s.Text()
-			case 8:
+			case !inWJ && i == 8:
 				submission.Memory = s.Text()
-			case 9: // Details
+
+			case !inWJ && i == 9: // Details
+			case inWJ && i == 7:
 				// assumes href="/contests/practice/submissions/00000000"
 				if href, exists := s.Children().First().Attr("href"); exists {
 					ss := strings.Split(href, "/")
@@ -161,5 +175,5 @@ func (pager *SubmissionsPager) Next() (submissions []*Submission, ok bool) {
 		})
 		submissions = append(submissions, submission)
 	})
-	return submissions, len(submissions) != 0
+	return submissions
 }
