@@ -17,6 +17,8 @@ type GlobalConfig struct {
 	TemplateCmdArgs      []string           `json:"template_cmd_args"`
 	TemplateCmdJsonInput bool               `json:"template_cmd_json_input"`
 	TemplateFile         string             `json:"template_file"`
+	RunCmdName           string             `json:"run_cmd_name"`
+	RunCmdArgs           []string           `json:"run_cmd_args"`
 	MainFileName         string             `json:"main_file_name"`
 	DefaultLanguage      atcodergo.Language `json:"default_language"`
 }

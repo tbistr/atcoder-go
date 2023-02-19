@@ -50,6 +50,8 @@ func initClient() {
 			TemplateCmdArgs:      []string{},
 			TemplateCmdJsonInput: false,
 			TemplateFile:         configDir("template"),
+			RunCmdName:           "go",
+			RunCmdArgs:           []string{"run", "{{main}}"},
 			MainFileName:         "main.go",
 			DefaultLanguage: atcodergo.Language{
 				Value:    "4026",
