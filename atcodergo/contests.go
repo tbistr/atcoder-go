@@ -19,7 +19,7 @@ type Contest struct {
 }
 
 // ContestsPager is pager for contests.
-// Atcoder's website serves contests list with pagenation.
+// Atcoder's website serves contests list with pagination.
 type ContestsPager struct {
 	client *Client
 	page   int

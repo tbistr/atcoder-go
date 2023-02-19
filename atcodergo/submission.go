@@ -3,12 +3,50 @@ package atcodergo
 import (
 	"errors"
 	"io"
+	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+// Submit answer program for the task.
+// Returns submission result (first of submission list).
+func (c *Client) Submit(contestID, taskID string, languageID string, program io.Reader) (*Submission, error) {
+	if !c.loggedin {
+		return nil, newNeedAuthError("Submit()")
+	}
+
+	u := BASE_URL.submit(contestID)
+	v := url.Values{}
+	v.Set("data.TaskScreenName", taskID)
+	v.Set("data.LanguageId", languageID)
+	b, err := io.ReadAll(program)
+	if err != nil {
+		return nil, err
+	}
+	v.Set("sourceCode", string(b))
+	v.Set("csrf_token", c.token)
+	resp, err := c.PostForm(u.String(), v)
+	if err != nil {
+		return nil, err
+	}
+	defer readAllClose(resp.Body)
+
+	if compareURL(*BASE_URL.submissions(contestID), *resp.Request.URL) {
+		// TODO: resp.BodyのHTMLをチェックしてエラー原因を出す
+		return nil, errors.New("failed to submit program")
+	}
+
+	submissions, ok := c.NewSubmissionsPager(contestID).Next()
+	if !ok || len(submissions) == 0 {
+		return nil, errors.New("failed to get submission")
+	}
+
+	return submissions[0], nil
+}
 
 type Submission struct {
 	ID           string
@@ -23,52 +61,45 @@ type Submission struct {
 	Memory       string
 }
 
-// Submit answer program for the task.
-func (c *Client) Submit(contestID, taskID string, languageID string, program io.Reader) error {
-	if !c.loggedin {
-		return newNeedAuthError("Submit()")
-	}
-
-	u := BASE_URL.submit(contestID)
-	v := url.Values{}
-	v.Set("data.TaskScreenName", taskID)
-	v.Set("data.LanguageId", languageID)
-	b, err := io.ReadAll(program)
-	if err != nil {
-		return err
-	}
-	v.Set("sourceCode", string(b))
-	v.Set("csrf_token", c.token)
-	resp, err := c.PostForm(u.String(), v)
-	if err != nil {
-		return err
-	}
-	defer readAllClose(resp.Body)
-
-	if compareURL(*BASE_URL.submissions(contestID), *resp.Request.URL) {
-		// TODO: resp.BodyのHTMLをチェックしてエラー原因を出す
-		return errors.New("failed to submit program")
-	}
-	// TODO: tableの一番上を読んで自分の提出情報を返す
-
-	return nil
+// SubmissionsPager is pager for submissions.
+// Atcoder serves submissions list with pagination.
+type SubmissionsPager struct {
+	client *Client
+	url    *url.URL
+	page   int
 }
 
-func (c *Client) Submission() error {
-	resp, _ := c.Get("https://atcoder.jp/contests/practice/submissions/me")
+// NewSubmissionsPager creates new SubmissionsPager.
+func (c *Client) NewSubmissionsPager(contestID string) *SubmissionsPager {
+	return &SubmissionsPager{
+		client: c,
+		url:    BASE_URL.submissions(contestID),
+		page:   0,
+	}
+}
+
+// parseSubmissions parses submission page.
+// https://atcoder.jp/contests/practice/submissions/me
+func (pager *SubmissionsPager) Next() (submissions []*Submission, ok bool) {
+	pager.page++
+
+	q := url.Values{}
+	q.Set("page", strconv.Itoa(pager.page))
+	pager.url.RawQuery = q.Encode()
+
+	resp, err := pager.client.Get(pager.url.String())
+	if err != nil {
+		return nil, false
+	}
+	defer readAllClose(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, false
+	}
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-	return nil
+		return nil, false
 	}
-	parseSubmissions(doc)
-
-	return nil
-}
-
-func parseSubmissions(doc *goquery.Document) ([]*Submission, error) {
-	submissions := []*Submission{}
-	var err error
 
 	doc.Find("table > tbody >tr").Each(func(i int, tr *goquery.Selection) {
 		td := tr.Find("td")
@@ -130,5 +161,5 @@ func parseSubmissions(doc *goquery.Document) ([]*Submission, error) {
 		})
 		submissions = append(submissions, submission)
 	})
-	return submissions, nil
+	return submissions, len(submissions) != 0
 }
