@@ -18,11 +18,13 @@ func (h *Handler) Submit() error {
 	}
 	defer f.Close()
 
-	if err := h.atcoder.Submit(taskMeta.ContestID, taskMeta.Task.ID, h.config.DefaultLanguage.Value, f); err != nil {
+	submission, err := h.atcoder.Submit(taskMeta.ContestID, taskMeta.Task.ID, h.config.DefaultLanguage.Value, f)
+	if err != nil {
 		return err
 	}
 
 	fmt.Println("submit success.")
-	fmt.Printf("see: https://atcoder.jp/contests/%s/submissions/me\n", taskMeta.ContestID)
+	fmt.Printf("see: https://atcoder.jp/contests/%s/submissions/%s\n", taskMeta.ContestID, submission.ID)
+
 	return nil
 }
