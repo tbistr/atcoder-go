@@ -6,7 +6,8 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/tbistr/atcoder-go/atcodergo/parse"
+	"github.com/tbistr/pig"
 )
 
 // Login to atcoder.
@@ -114,11 +115,11 @@ func (c *Client) getCSRF() error {
 	}
 	defer readAllClose(tokenResp.Body)
 
-	doc, err := goquery.NewDocumentFromReader(tokenResp.Body)
+	doc, err := pig.Parse(tokenResp.Body)
 	if err != nil {
 		return err
 	}
-	token, exist := doc.Find("input[name=csrf_token]").Attr("value")
+	token, exist := parse.GetCsrf(doc)
 	if !exist {
 		return errors.New("csrf_token not found")
 	}

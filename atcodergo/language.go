@@ -1,14 +1,16 @@
 package atcodergo
 
-import "github.com/PuerkitoBio/goquery"
+import (
+	"errors"
+
+	"github.com/tbistr/atcoder-go/atcodergo/model"
+	"github.com/tbistr/atcoder-go/atcodergo/parse"
+	"github.com/tbistr/pig"
+)
 
 // Language stand for
 // "<option value={Language.Value} data-mime={Language.Datamime}>{Language.Text}</option>"
-type Language struct {
-	Value    string
-	Datamime string
-	Text     string
-}
+type Language = model.Language
 
 // Languages lists up acceptable languages.
 func (c *Client) Languages() ([]Language, error) {
@@ -22,22 +24,16 @@ func (c *Client) Languages() ([]Language, error) {
 	}
 	defer readAllClose(resp.Body)
 
-	Languages := []Language{}
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	doc, err := pig.Parse(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	doc.Find("#select-lang-practice_1 > select > option").Each(func(i int, s *goquery.Selection) {
-		// index-0 == "<option></option>"
-		if i == 0 {
-			return
-		}
-		// else is "<option value="4001" data-mime="text/x-csrc">C (GCC 9.2.1)</option>"
-		value, _ := s.Attr("value")
-		datamime, _ := s.Attr("data-mime")
-		text := s.Text()
-		Languages = append(Languages, Language{Value: value, Datamime: datamime, Text: text})
-	})
 
-	return Languages, nil
+	langs := parse.Language(doc)
+	if len(langs) == 0 {
+		// return nil, newParseError("Languages()")
+		return nil, errors.New("parse error: Languages() = empty")
+	} else {
+		return langs, nil
+	}
 }

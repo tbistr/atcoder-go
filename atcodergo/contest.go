@@ -4,14 +4,21 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"unsafe"
 
 	"github.com/tbistr/atcoder-go/atcodergo/model"
 	"github.com/tbistr/atcoder-go/atcodergo/parse"
 	"github.com/tbistr/pig"
 )
 
-type Contest model.Contest
+// Contest
+//
+//	type Contest struct {
+//	    Name  string
+//	    ID    string // like "abc123"
+//	    Kind  string // like "Algorithm", "Heuristics"...
+//	    State string // "permanent", "upcoming", "archive"
+//	}
+type Contest = model.Contest
 
 // ContestsPager is pager for contests.
 // Atcoder's website serves contests list with pagination.
@@ -53,15 +60,11 @@ func (pager *ContestsPager) Next() (contests []*Contest, ok bool) {
 		return nil, false
 	}
 
-	cast := func(cs []*model.Contest) []*Contest {
-		return *(*[]*Contest)(unsafe.Pointer(&cs))
-	}
-
 	var cs []*Contest
 	if pager.page == 0 {
-		cs = cast(append(parse.Permanents(doc), parse.Upcomings(doc)...))
+		cs = append(parse.Permanents(doc), parse.Upcomings(doc)...)
 	} else {
-		cs = cast(parse.Archives(doc))
+		cs = parse.Archives(doc)
 	}
 
 	pager.page++
